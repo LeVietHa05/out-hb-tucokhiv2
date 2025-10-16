@@ -23,3 +23,11 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 }
+
+// Add a DELETE endpoint to clear the command after enrollment is complete
+export async function DELETE() {
+  // Clear the command by setting it to null or empty
+  // Since the store doesn't have a clear function, we'll set an empty command
+  setCommand('');
+  return NextResponse.json({ ok: true });
+}

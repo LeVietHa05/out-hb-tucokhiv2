@@ -1,0 +1,10 @@
+{
+  "currentUser": {
+    "id": "user_1760612832931",
+    "name": "test 3",
+    "role": "tester",
+    "last_access": "2025-10-16T11:07:12.931Z",
+    "fingerprint_status": "enrolling"
+  },
+  "allUsers": []
+}
