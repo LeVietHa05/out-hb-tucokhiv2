@@ -3,6 +3,7 @@ interface State {
   code: number;
   data: string;
   time: string;
+  positionNumber?: number;
 }
 
 interface EnrollResult {
@@ -35,7 +36,7 @@ interface UserInfo {
   role: string;
   last_access: string;
   fingerprint_status: string;
-  positionFingerprint?: string;
+  positionFingerprint?: number;
 }
 
 interface PersistentData {
@@ -51,7 +52,7 @@ let commands: Command[] = [];
 let logs: string[] = [];
 let latestImage: ImageData | null = null;
 let currentUser: UserInfo | null = null;
-let pendingEnrollmentPosition: string | null = null;
+let pendingEnrollmentPosition: number | undefined = undefined;
 
 // File I/O functions for persistent data
 const readPersistentData = async (): Promise<PersistentData> => {
@@ -73,69 +74,89 @@ const writePersistentData = async (data: PersistentData): Promise<void> => {
 };
 
 export const setState = async (newState: State) => {
+  console.log("[STATE] setState called with:", newState);
   currentState = newState;
+  logs.push(`[SYSTEM] Received state update: ${JSON.stringify(newState)}`);
 
   // Handle fingerprint authentication
-  if (newState.event === "finger" && newState.code === 0) {
-    const position = newState.data;
+  if (newState.event === "finger") {
+    if (newState.code !== 0) {
+      console.log("[STATE] no user found");
+      logs.push(`[SYSTEM] no user found`);
+    }
+    const position = +newState.data;
+    console.log(
+      "[STATE] Processing fingerprint authentication for position:",
+      position
+    );
+    logs.push(
+      `[SYSTEM] Processing fingerprint authentication for position: ${position}`
+    );
     const persistentData = await readPersistentData();
+    console.log(
+      "[STATE] Loaded users for authentication, count:",
+      persistentData.allUsers.length
+    );
     const user = persistentData.allUsers.find(
       (u) => u.positionFingerprint === position
     );
 
     if (user) {
+      console.log("[STATE] Found user for position:", user.name);
       // Update last access and set as current user
       user.last_access = new Date().toISOString();
       currentUser = user;
       persistentData.currentUser = user;
       await writePersistentData(persistentData);
-      logs.push(`[${user.name}] User authenticated via fingerprint`);
+      logs.push(
+        `[${user.name}] User authenticated via fingerprint at position ${position}`
+      );
+      console.log("[STATE] User authentication completed:", user.name);
     } else {
-      logs.push(`Unknown fingerprint position: ${position}`);
+      console.log("[STATE] ERROR: No user found for position:", position);
+      logs.push(
+        `[ERROR] Unknown fingerprint position: ${position}. No user found with this position.`
+      );
     }
   }
   // Handle fingerprint registration completion
   else if (newState.event === "register finger" && newState.code === 0) {
+    console.log(
+      "[STATE] Fingerprint registration completed at position:",
+      newState.positionNumber
+    );
     // Store the position for pending enrollment
-    pendingEnrollmentPosition = newState.data;
-    logs.push(`Fingerprint registration completed at position: ${newState.data}`);
+    pendingEnrollmentPosition = newState.positionNumber;
+    logs.push(
+      `[SYSTEM] Fingerprint registration completed at position: ${newState.data}. Ready for user enrollment.`
+    );
+  }
+  // Handle enrollment command
+  else if (newState.event === "enroll_fingerprint") {
+    console.log("[STATE] Enrollment command received");
+    logs.push(
+      `[SYSTEM] Enrollment command received. Waiting for fingerprint registration.`
+    );
   } else {
-    const userName = currentUser ? `[${currentUser.name}] ` : "";
+    console.log("[STATE] Other state update:", newState.event, newState.code);
+    const userName = currentUser ? `[${currentUser.name}] ` : "[SYSTEM] ";
     logs.push(`${userName}State updated: ${JSON.stringify(newState)}`);
   }
+  console.log("[STATE] setState completed");
 };
 
 export const getState = (): State | null => currentState;
-
-export const addEnrollResult = async (result: EnrollResult) => {
-  enrollResults.push(result);
-
-  // If enrollment was successful, save the position fingerprint
-  if (result.result === "success" && result.id) {
-    const persistentData = await readPersistentData();
-    const user = persistentData.allUsers.find((u) => u.id === result.id);
-    if (user && !user.positionFingerprint) {
-      // This assumes the position comes from the latest state or is embedded in result
-      // For now, we'll need to get it from the current state if it's a finger event
-      if (currentState && currentState.event === "finger") {
-        user.positionFingerprint = currentState.data;
-        user.fingerprint_status = "enrolled";
-        await writePersistentData(persistentData);
-      }
-    }
-  }
-
-  const userName = currentUser ? `[${currentUser.name}] ` : "";
-  logs.push(`${userName}Enroll result added: ${result.result}`);
-};
-
-export const getEnrollResults = (): EnrollResult[] => enrollResults;
 
 export const setCommand = (command: string) => {
   const newCommand: Command = { command, timestamp: new Date().toISOString() };
   commands.push(newCommand);
   const userName = currentUser ? `[${currentUser.name}] ` : "";
   logs.push(`${userName}Command set: ${command}`);
+
+  //clear command after 5s
+  setTimeout(() => {
+    commands = [];
+  }, 5000);
 };
 
 export const getLatestCommand = (): Command | null => {
@@ -151,7 +172,7 @@ export const resetAll = async () => {
   logs = [];
   latestImage = null;
   currentUser = null;
-  pendingEnrollmentPosition = null;
+  pendingEnrollmentPosition = undefined;
 
   // Reset persistent data
   const persistentData: PersistentData = { currentUser: null, allUsers: [] };
@@ -165,14 +186,6 @@ export const setLatestImage = (image: ImageData) => {
 };
 
 export const getLatestImage = (): ImageData | null => latestImage;
-
-// TODO: add new user to json
-export const addNewUser = async (user: UserInfo) => {
-  const persistentData = await readPersistentData();
-  persistentData.allUsers.push(user);
-  await writePersistentData(persistentData);
-  logs.push(`Account added : ${user.name}`);
-};
 
 export const setCurrentUser = async (user: UserInfo) => {
   currentUser = user;
@@ -191,9 +204,13 @@ export const getAllUsers = async (): Promise<UserInfo[]> => {
 };
 
 export const addUser = async (user: UserInfo): Promise<void> => {
+  logs.push(
+    `[SYSTEM] Adding new user: ${user.name} (${user.role}) with ID: ${user.id}`
+  );
   const persistentData = await readPersistentData();
   persistentData.allUsers.push(user);
   await writePersistentData(persistentData);
+  logs.push(`[SUCCESS] User ${user.name} added to persistent storage`);
 };
 
 export const logoutUser = async (): Promise<void> => {
@@ -204,8 +221,9 @@ export const logoutUser = async (): Promise<void> => {
   logs.push("User logged out");
 };
 
-export const getPendingEnrollmentPosition = (): string | null => pendingEnrollmentPosition;
+export const getPendingEnrollmentPosition = (): number | undefined =>
+  pendingEnrollmentPosition;
 
 export const clearPendingEnrollmentPosition = (): void => {
-  pendingEnrollmentPosition = null;
+  pendingEnrollmentPosition = undefined;
 };

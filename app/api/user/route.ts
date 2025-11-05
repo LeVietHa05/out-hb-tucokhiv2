@@ -21,10 +21,10 @@ export async function GET() {
     // Return mock data for testing
     return NextResponse.json({
       id: 'user001',
-      name: 'John Doe',
-      role: 'Technician',
+      name: 'No user',
+      role: 'none',
       last_access: new Date().toISOString(),
-      fingerprint_status: 'enrolled'
+      fingerprint_status: 'no user'
     });
   }
 }

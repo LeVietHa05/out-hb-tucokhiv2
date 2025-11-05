@@ -13,6 +13,7 @@ export async function GET() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log(body)
     if (body.command) {
       setCommand(body.command);
       return NextResponse.json({ ok: true });

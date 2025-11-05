@@ -7,7 +7,7 @@ const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function Header() {
   const { data: commandData } = useSWR('/api/command', fetcher, { refreshInterval: 1000 });
-  const { data: userData } = useSWR('/api/user', fetcher, { refreshInterval: 30000 });
+  const { data: userData } = useSWR('/api/user', fetcher, { refreshInterval: 5000 });
   const [isEnrolling, setIsEnrolling] = useState(false);
 
   const handleEnrollClick = async () => {
@@ -16,7 +16,7 @@ export default function Header() {
       await fetch('/api/command', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'enroll_fingerprint' }),
+        body: JSON.stringify({ command: 'enroll' }),
       });
       // Note: Enrollment mode will be handled in UserPanel
     } catch (error) {

@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import useSWR from 'swr';
+import EnrrolButton from './enroll_finger_button';
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 export default function UserPanel() {
-  const { data: userData, error: userError, mutate: mutateUser } = useSWR('/api/user', fetcher, { refreshInterval: 30000 });
-  const { data: enrollData, error: enrollError } = useSWR('/api/enroll_result', fetcher, { refreshInterval: 5000 });
+  const { data: userData, error: userError, mutate: mutateUser } = useSWR('/api/user', fetcher, { refreshInterval: 5000 });
   const { data: commandData } = useSWR('/api/command', fetcher, { refreshInterval: 1000 });
 
   const [isEnrolling, setIsEnrolling] = useState(false);
@@ -16,7 +16,7 @@ export default function UserPanel() {
   const [isWaitingForFingerprint, setIsWaitingForFingerprint] = useState(false);
 
   useEffect(() => {
-    if (commandData?.command === 'enroll_fingerprint') {
+    if (commandData?.command === 'enroll') {
       setIsEnrolling(true);
       setIsWaitingForFingerprint(true);
     }
@@ -26,12 +26,15 @@ export default function UserPanel() {
     if (!newUserName.trim() || !newUserRole.trim()) return;
 
     try {
+      console.log('[UserPanel] Attempting to save user:', newUserName, newUserRole);
       // Check if fingerprint registration is complete
       const response = await fetch('/api/user/pending-position');
       const data = await response.json();
+      console.log('[UserPanel] Pending position check result:', data);
 
       if (!data.position) {
         alert('Please complete fingerprint registration first before saving user information.');
+        console.error('[UserPanel] No pending position found for enrollment');
         return;
       }
 
@@ -44,12 +47,20 @@ export default function UserPanel() {
         positionFingerprint: data.position
       };
 
+      console.log('[UserPanel] Saving user with data:', newUser);
+
       // Save user to persistent storage
-      await fetch('/api/user', {
+      const saveResponse = await fetch('/api/user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newUser),
       });
+
+      if (!saveResponse.ok) {
+        throw new Error(`Failed to save user: ${saveResponse.status} ${saveResponse.statusText}`);
+      }
+
+      console.log('[UserPanel] User saved successfully');
 
       setNewUserName('');
       setNewUserRole('');
@@ -61,8 +72,11 @@ export default function UserPanel() {
       await fetch('/api/command', {
         method: 'DELETE',
       });
+
+      console.log('[UserPanel] Enrollment process completed successfully');
     } catch (error) {
-      console.error('Error saving user:', error);
+      console.error('[UserPanel] Error saving user:', error);
+      alert('Error saving user. Please check the logs for details.');
     }
   };
 
@@ -111,20 +125,23 @@ export default function UserPanel() {
               className="w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
           </div>
-          <div className="flex space-x-2">
-            <button
-              onClick={handleSaveUser}
-              disabled={!newUserName.trim() || !newUserRole.trim()}
-              className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
-            >
-              Save & Enroll
-            </button>
-            <button
-              onClick={handleCancelEnroll}
-              className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-            >
-              Cancel
-            </button>
+          <div className='space-y-2'>
+            <EnrrolButton />
+            <div className="flex space-x-2">
+              <button
+                onClick={handleSaveUser}
+                disabled={!newUserName.trim() || !newUserRole.trim()}
+                className="flex-1 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 disabled:bg-gray-400"
+              >
+                Save
+              </button>
+              <button
+                onClick={handleCancelEnroll}
+                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -167,17 +184,6 @@ export default function UserPanel() {
           </div>
         )}
 
-        <div className="border-t pt-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-2">Recent Enrollments</h3>
-          {enrollData?.results?.slice(-3).map((result: any, index: number) => (
-            <div key={index} className="flex justify-between items-center py-1 text-sm">
-              <span className="text-gray-600">ID: {result.id}</span>
-              <span className={`font-medium ${result.result === 'success' ? 'text-green-600' : 'text-red-600'}`}>
-                {result.result}
-              </span>
-            </div>
-          )) || <p className="text-sm text-gray-500">No recent enrollments</p>}
-        </div>
       </div>
     </div>
   );
