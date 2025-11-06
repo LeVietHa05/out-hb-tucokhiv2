@@ -1,0 +1,45 @@
+{
+  "time": "2025-11-06T11:37:25.019Z",
+  "predictions": {
+    "image": {
+      "width": 1280,
+      "height": 720
+    },
+    "predictions": [
+      {
+        "width": 461.682373046875,
+        "height": 299.0230712890625,
+        "x": 790.05859375,
+        "y": 414.68634033203125,
+        "confidence": 0.9684556722640991,
+        "class_id": 7,
+        "class": "wrench",
+        "detection_id": "c122bc9c-23a5-44b3-9069-93ef3186182e",
+        "parent_id": "image"
+      },
+      {
+        "width": 829.0728454589844,
+        "height": 674.476405620575,
+        "x": 729.7660675048828,
+        "y": 344.0472586154938,
+        "confidence": 0.9222325682640076,
+        "class_id": 0,
+        "class": "hammer",
+        "detection_id": "b5dc571c-1fb4-472c-a7f5-3ad1e9339b89",
+        "parent_id": "image"
+      },
+      {
+        "width": 1112.3912506103516,
+        "height": 687.2879948616028,
+        "x": 572.4000778198242,
+        "y": 348.52525305747986,
+        "confidence": 0.6856125593185425,
+        "class_id": 0,
+        "class": "hammer",
+        "detection_id": "73023187-f9a0-4a90-ae32-85e4c05d52ec",
+        "parent_id": "image"
+      }
+    ]
+  },
+  "imagePath": "/detections/1762429045018.jpg"
+}
