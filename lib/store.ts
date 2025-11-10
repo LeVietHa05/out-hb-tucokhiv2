@@ -17,16 +17,6 @@ interface Command {
   timestamp: string;
 }
 
-interface ImageData {
-  url: string;
-  timestamp: string;
-  metadata: {
-    detected_tools: string[];
-    confidence_scores: number[];
-    annotations: any[];
-  };
-}
-
 import { promises as fs } from "fs";
 import path from "path";
 
@@ -50,7 +40,6 @@ let currentState: State | null = null;
 let enrollResults: EnrollResult[] = [];
 let commands: Command[] = [];
 let logs: string[] = [];
-let latestImage: ImageData | null = null;
 let currentUser: UserInfo | null = null;
 let pendingEnrollmentPosition: number | undefined = undefined;
 
@@ -83,6 +72,7 @@ export const setState = async (newState: State) => {
     if (newState.code !== 0) {
       console.log("[STATE] no user found");
       logs.push(`[SYSTEM] no user found`);
+      return;
     }
     const position = +newState.data;
     console.log(
@@ -137,6 +127,8 @@ export const setState = async (newState: State) => {
     logs.push(
       `[SYSTEM] Enrollment command received. Waiting for fingerprint registration.`
     );
+  } else if (newState.event == "qr") {
+
   } else {
     console.log("[STATE] Other state update:", newState.event, newState.code);
     const userName = currentUser ? `[${currentUser.name}] ` : "[SYSTEM] ";
@@ -170,7 +162,6 @@ export const resetAll = async () => {
   enrollResults = [];
   commands = [];
   logs = [];
-  latestImage = null;
   currentUser = null;
   pendingEnrollmentPosition = undefined;
 
@@ -178,14 +169,6 @@ export const resetAll = async () => {
   const persistentData: PersistentData = { currentUser: null, allUsers: [] };
   await writePersistentData(persistentData);
 };
-
-export const setLatestImage = (image: ImageData) => {
-  latestImage = image;
-  const userName = currentUser ? `[${currentUser.name}] ` : "";
-  logs.push(`${userName}New image received: ${image.timestamp}`);
-};
-
-export const getLatestImage = (): ImageData | null => latestImage;
 
 export const setCurrentUser = async (user: UserInfo) => {
   currentUser = user;
