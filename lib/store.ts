@@ -6,12 +6,22 @@ interface State {
   positionNumber?: number;
 }
 
-interface EnrollResult {
+interface Item {
   id: string;
-  result: string;
-  timestamp: string;
+  name: string;
+  type: string;
+  qr_code: string;
+  borrowed_by: string | null;
 }
 
+interface ActivityLog {
+  id: string;
+  user_id: string;
+  action: "borrow" | "return";
+  item_id: string;
+  item_name: string;
+  timestamp: string;
+}
 interface Command {
   command: string;
   timestamp: string;
@@ -32,29 +42,30 @@ interface UserInfo {
 interface PersistentData {
   currentUser: UserInfo | null;
   allUsers: UserInfo[];
+  items: Item[];
+  activityLogs: ActivityLog[];
 }
 
 const DATA_FILE_PATH = path.join(process.cwd(), "data.json");
 
 let currentState: State | null = null;
-let enrollResults: EnrollResult[] = [];
 let commands: Command[] = [];
 let logs: string[] = [];
 let currentUser: UserInfo | null = null;
 let pendingEnrollmentPosition: number | undefined = undefined;
 
 // File I/O functions for persistent data
-const readPersistentData = async (): Promise<PersistentData> => {
+export const readPersistentData = async (): Promise<PersistentData> => {
   try {
     const data = await fs.readFile(DATA_FILE_PATH, "utf-8");
     return JSON.parse(data);
   } catch (error) {
     // Return default structure if file doesn't exist or is corrupted
-    return { currentUser: null, allUsers: [] };
+    return { currentUser: null, allUsers: [], items: [], activityLogs: [] };
   }
 };
 
-const writePersistentData = async (data: PersistentData): Promise<void> => {
+export const writePersistentData = async (data: PersistentData): Promise<void> => {
   try {
     await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2));
   } catch (error) {
@@ -128,7 +139,6 @@ export const setState = async (newState: State) => {
       `[SYSTEM] Enrollment command received. Waiting for fingerprint registration.`
     );
   } else if (newState.event == "qr") {
-
   } else {
     console.log("[STATE] Other state update:", newState.event, newState.code);
     const userName = currentUser ? `[${currentUser.name}] ` : "[SYSTEM] ";
@@ -159,14 +169,18 @@ export const getLogs = (): string[] => logs;
 
 export const resetAll = async () => {
   currentState = null;
-  enrollResults = [];
   commands = [];
   logs = [];
   currentUser = null;
   pendingEnrollmentPosition = undefined;
 
   // Reset persistent data
-  const persistentData: PersistentData = { currentUser: null, allUsers: [] };
+  const persistentData: PersistentData = {
+    currentUser: null,
+    allUsers: [],
+    items: [],
+    activityLogs: [],
+  };
   await writePersistentData(persistentData);
 };
 

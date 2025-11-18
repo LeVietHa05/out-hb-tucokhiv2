@@ -3,7 +3,7 @@
     "id": "user_1762341500256",
     "name": "ha",
     "role": "dev",
-    "last_access": "2025-11-06T11:30:42.347Z",
+    "last_access": "2025-11-17T04:48:18.171Z",
     "fingerprint_status": "enrolled",
     "positionFingerprint": 1
   },
@@ -12,9 +12,75 @@
       "id": "user_1762341500256",
       "name": "ha",
       "role": "dev",
-      "last_access": "2025-11-06T11:30:42.347Z",
+      "last_access": "2025-11-17T04:48:18.171Z",
       "fingerprint_status": "enrolled",
       "positionFingerprint": 1
+    }
+  ],
+  "items": [
+    {
+      "id": "book_101",
+      "name": "Giải tích 1",
+      "type": "book",
+      "qr_code": "QR123ABC",
+      "borrowed_by": null
+    },
+    {
+      "id": "book_1762766502404",
+      "name": "Lén nhặt chuyện đời",
+      "type": "book",
+      "qr_code": "8936228200774",
+      "borrowed_by": null
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": "log_001",
+      "user_id": "user_1762341500256",
+      "action": "borrow",
+      "item_id": "book_101",
+      "item_name": "Giải tích 1",
+      "timestamp": "2025-11-06T11:31:00.000Z"
+    },
+    {
+      "id": "log_002",
+      "user_id": "user_1762341500256",
+      "action": "return",
+      "item_id": "book_101",
+      "item_name": "Giải tích 1",
+      "timestamp": "2025-11-06T11:45:00.000Z"
+    },
+    {
+      "id": "log_1762768223814",
+      "user_id": "user_1762341500256",
+      "action": "borrow",
+      "item_id": "book_1762766502404",
+      "item_name": "Lén nhặt chuyện đời",
+      "timestamp": "2025-11-10T09:50:23.814Z"
+    },
+    {
+      "id": "log_1762768251251",
+      "user_id": "user_1762341500256",
+      "action": "return",
+      "item_id": "book_1762766502404",
+      "item_name": "Lén nhặt chuyện đời",
+      "timestamp": "2025-11-10T09:50:51.251Z"
+    },
+    {
+      "id": "log_1762769164283",
+      "user_id": "user_1762341500256",
+      "action": "borrow",
+      "item_id": "book_1762766502404",
+      "item_name": "Lén nhặt chuyện đời",
+      "timestamp": "2025-11-10T10:06:04.283Z"
+    },
+    {
+      "id": "log_1762769182011",
+      "user_id": "user_1762341500256",
+      "action": "return",
+      "item_id": "book_1762766502404",
+      "item_name": "Lén nhặt chuyện đời",
+      "timestamp": "2025-11-10T10:06:22.011Z"
     }
   ]
 }

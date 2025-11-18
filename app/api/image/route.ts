@@ -2,29 +2,39 @@ import { NextRequest, NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
 
-let currentImage = {
-  time: "2025-11-06T11:18:26.993Z",
-  predictions: {
-    image: {
-      width: 1280,
-      height: 720,
-    },
-    predictions: [
-      {
-        width: 879.923828125,
-        height: 416.7146544456482,
-        x: 840.0380859375,
-        y: 211.84070134162903,
-        confidence: 0.4229481816291809,
-        class_id: 5,
-        class: "screwdriver",
-        detection_id: "5fd9fb6f-584c-479f-a524-a0ad1367cb09",
-        parent_id: "image",
+// Initialize currentImage by reading from detections.json
+let currentImage: any = {};
+try {
+  const detectionsPath = path.join(process.cwd(), "data", "detections.json");
+  if (fs.existsSync(detectionsPath)) {
+    currentImage = JSON.parse(fs.readFileSync(detectionsPath, "utf-8"));
+  } else {
+    currentImage = {
+      time: "2025-11-06T11:18:26.993Z",
+      predictions: {
+        image: {
+          width: 1280,
+          height: 720,
+        },
+        predictions: [],
       },
-    ],
-  },
-  imagePath: "/detections/detect.jpg",
-};
+      imagePath: "/detections/detect.jpg",
+    };
+  }
+} catch (error) {
+  console.error("Error loading detections.json:", error);
+  currentImage = {
+    time: "2025-11-06T11:18:26.993Z",
+    predictions: {
+      image: {
+        width: 1280,
+        height: 720,
+      },
+      predictions: [],
+    },
+    imagePath: "/detections/detect.jpg",
+  };
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -43,7 +53,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.ROBOFLOW_API_KEY!;
     const workspace = "workspace-lwoz7";
     const workflowId =
-      "find-rubber-hammers-hammers-pliers-wire-cutter-pliers-pointy-pliers-scissors-screwdrivers-and-wrenches";
+      "find-wrenches-rubber-hammers-screwdrivers-wire-cutters-scissors-pointy-pliers-hammers-and-pliers";
 
     const response = await fetch(
       `https://serverless.roboflow.com/${workspace}/workflows/${workflowId}`,
@@ -58,18 +68,20 @@ export async function POST(req: NextRequest) {
     );
 
     const result = await response.json();
-    console.dir(result);
-    console.dir(result.outputs[0].predictions);
+    // console.dir(result);
+    // console.dir(result.outputs[0].predictions);
 
     const outputDir = path.join(process.cwd(), "public", "detections");
     fs.mkdirSync(outputDir, { recursive: true });
     const outputPath = path.join(outputDir, `${Date.now()}.jpg`);
 
-    const vizBase64 = result.outputs?.[0]?.visualization.value;
+    const vizBase64 = result.outputs?.[0]?.label_visualization.value;
     if (vizBase64) {
       fs.writeFileSync(outputPath, Buffer.from(vizBase64, "base64"));
     }
 
+    // const outputPath2 = path.join(outputDir, `b_${Date.now()}.jpg`);
+    // fs.writeFileSync(outputPath2, Buffer.from(base64Image, "base64"));
     // 🧹 XÓA ẢNH CŨ HƠN 24 GIỜ
     const DAY_MS = 24 * 60 * 60 * 1000;
     const now = Date.now();

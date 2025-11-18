@@ -1,45 +1,111 @@
 {
-  "time": "2025-11-06T11:37:25.019Z",
+  "time": "2025-11-17T04:49:22.532Z",
   "predictions": {
     "image": {
-      "width": 1280,
-      "height": 720
+      "width": 3280,
+      "height": 2464
     },
     "predictions": [
       {
-        "width": 461.682373046875,
-        "height": 299.0230712890625,
-        "x": 790.05859375,
-        "y": 414.68634033203125,
-        "confidence": 0.9684556722640991,
+        "width": 647.431640625,
+        "height": 1622.3828125,
+        "x": 919.296875,
+        "y": 1483.046875,
+        "confidence": 0.9951896667480469,
+        "class_id": 0,
+        "class": "hammer",
+        "detection_id": "17134c83-f82b-40cd-8a87-2d8dfa07ed0b",
+        "parent_id": "image"
+      },
+      {
+        "width": 239.033203125,
+        "height": 916.89453125,
+        "x": 1471.03515625,
+        "y": 834.4140625,
+        "confidence": 0.9904149770736694,
+        "class_id": 4,
+        "class": "scissor",
+        "detection_id": "69cbe362-3ad8-47d0-b17d-7da69186d6cf",
+        "parent_id": "image"
+      },
+      {
+        "width": 961.73828125,
+        "height": 155.25146484375,
+        "x": 1488.65234375,
+        "y": 1643.203125,
+        "confidence": 0.9892828464508057,
+        "class_id": 5,
+        "class": "screwdriver",
+        "detection_id": "a660744a-b618-4d6d-ac38-85cade0056b9",
+        "parent_id": "image"
+      },
+      {
+        "width": 939.31640625,
+        "height": 158.45458984375,
+        "x": 1479.04296875,
+        "y": 1867.421875,
+        "confidence": 0.9889912605285645,
+        "class_id": 5,
+        "class": "screwdriver",
+        "detection_id": "451b93cb-440e-4309-94e4-ebf1dae97eb3",
+        "parent_id": "image"
+      },
+      {
+        "width": 212.4072265625,
+        "height": 478.466796875,
+        "x": 1678.4375,
+        "y": 1250.01953125,
+        "confidence": 0.9856584072113037,
+        "class_id": 6,
+        "class": "wire-cutter",
+        "detection_id": "800f4971-b596-456e-81a1-1a3821e79d1c",
+        "parent_id": "image"
+      },
+      {
+        "width": 234.4287109375,
+        "height": 485.673828125,
+        "x": 1942.6953125,
+        "y": 1246.81640625,
+        "confidence": 0.9855043888092041,
+        "class_id": 6,
+        "class": "wire-cutter",
+        "detection_id": "510f0a07-a985-42a2-94a0-9c23db4d99a5",
+        "parent_id": "image"
+      },
+      {
+        "width": 633.41796875,
+        "height": 187.1826171875,
+        "x": 1000.17578125,
+        "y": 537.724609375,
+        "confidence": 0.9770615100860596,
         "class_id": 7,
         "class": "wrench",
-        "detection_id": "c122bc9c-23a5-44b3-9069-93ef3186182e",
+        "detection_id": "49c9ebc6-f2a6-4ec7-926e-7cb543f7f6c4",
         "parent_id": "image"
       },
       {
-        "width": 829.0728454589844,
-        "height": 674.476405620575,
-        "x": 729.7660675048828,
-        "y": 344.0472586154938,
-        "confidence": 0.9222325682640076,
-        "class_id": 0,
-        "class": "hammer",
-        "detection_id": "b5dc571c-1fb4-472c-a7f5-3ad1e9339b89",
+        "width": 161.1572265625,
+        "height": 394.384765625,
+        "x": 2104.453125,
+        "y": 2094.84375,
+        "confidence": 0.9742380380630493,
+        "class_id": 3,
+        "class": "rubber-hammer",
+        "detection_id": "2149db1f-f9a1-414c-becf-00479a27c375",
         "parent_id": "image"
       },
       {
-        "width": 1112.3912506103516,
-        "height": 687.2879948616028,
-        "x": 572.4000778198242,
-        "y": 348.52525305747986,
-        "confidence": 0.6856125593185425,
-        "class_id": 0,
-        "class": "hammer",
-        "detection_id": "73023187-f9a0-4a90-ae32-85e4c05d52ec",
+        "width": 166.962890625,
+        "height": 258.8525390625,
+        "x": 2136.484375,
+        "y": 461.650390625,
+        "confidence": 0.9725251793861389,
+        "class_id": 2,
+        "class": "pointy-pliers",
+        "detection_id": "cd5aa7af-468f-4485-a423-82fb3bb006e9",
         "parent_id": "image"
       }
     ]
   },
-  "imagePath": "/detections/1762429045018.jpg"
+  "imagePath": "/detections/1763354962527.jpg"
 }

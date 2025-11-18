@@ -2,6 +2,7 @@ import Header from './components/Header';
 import ImageDisplay from './components/ImageDisplay';
 import UserPanel from './components/UserPanel';
 import ActivityLogs from './components/ActivityLogs';
+import Bookshelf from './components/BookShelf';
 
 export default function Home() {
   return (
@@ -12,6 +13,7 @@ export default function Home() {
           {/* Left section - 70% width on large screens */}
           <div className="lg:col-span-2">
             <ImageDisplay />
+            <Bookshelf/>
           </div>
 
           {/* Right section - 30% width on large screens */}
