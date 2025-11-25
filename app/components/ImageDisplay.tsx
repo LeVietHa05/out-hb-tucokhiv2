@@ -8,7 +8,7 @@ export default function ImageDisplay() {
   const { data, error } = useSWR('/api/image', fetcher, { refreshInterval: 5000 });
 
   if (error) return <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">Failed to load image</div>;
-  if (!data) return <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">Loading image...</div>;
+  if (!data || !data.predictions.predictions) return <div className="flex items-center justify-center h-full bg-gray-100 rounded-lg">Loading image...</div>;
 
   return (
     <div className="bg-white rounded-lg shadow-sm border h-full flex flex-col">
@@ -18,7 +18,7 @@ export default function ImageDisplay() {
       </div>
       <div className="flex-1 p-4">
         <img
-          src={data.imagePath}
+          src={`/api/${data.imagePath}`}
           alt="Tool cabinet camera feed"
           className="w-full h-full object-cover rounded-lg"
         />
