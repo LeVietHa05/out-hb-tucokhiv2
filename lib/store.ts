@@ -231,10 +231,10 @@ export const logoutUser = async (): Promise<void> => {
 };
 
 export const getPendingEnrollmentPosition = async (): Promise<
-  number | null
+  PersistentData
 > => {
   const persistentData = await readPersistentData();
-  return persistentData.newEnrollPosition;
+  return persistentData;
 };
 
 export const clearPendingEnrollmentPosition = async (): Promise<void> => {
