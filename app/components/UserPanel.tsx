@@ -44,7 +44,7 @@ export default function UserPanel() {
         role: newUserRole.trim(),
         last_access: new Date().toISOString(),
         fingerprint_status: 'enrolled',
-        positionFingerprint: data.position
+        positionFingerprint: data.positionNumber
       };
 
       console.log('[UserPanel] Saving user with data:', newUser);

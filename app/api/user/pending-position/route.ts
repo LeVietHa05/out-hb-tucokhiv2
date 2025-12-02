@@ -1,8 +1,8 @@
-import { NextResponse } from 'next/server';
-import { getPendingEnrollmentPosition } from '../../../../lib/store';
+import { NextResponse } from "next/server";
+import { getPendingEnrollmentPosition } from "../../../../lib/store";
 
 export async function GET() {
-  const p = getPendingEnrollmentPosition();
-  console.log("position", p)
-  return NextResponse.json({ position: p });
+  const position =await getPendingEnrollmentPosition();
+  console.log("position", position);
+  return NextResponse.json({ position });
 }
