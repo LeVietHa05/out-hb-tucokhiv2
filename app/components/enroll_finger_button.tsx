@@ -7,9 +7,9 @@ const fetcher = (url: string) => fetch(url).then((res) => {return res.json()});
 export default function EnrrolButton() {
 
     const { data: stateData } = useSWR('/api/state', fetcher, { refreshInterval: 1000 });
-    console.log(stateData)
+    // console.log(stateData)
     let currentStage =  "Start enroll" 
-    if (stateData?.state?.event == "register finger") {
+    if (stateData?.state?.event == "register finger" && isTimeValid(stateData?.state?.time)) {
         currentStage = stateData.state.data
     }
     const handleRequestFingerprint = async () => {
@@ -25,6 +25,19 @@ export default function EnrrolButton() {
             console.error('Error requesting fingerprint:', error);
         }
     };
+
+    function isTimeValid (timeToCheck: string) {
+        const now =  Date.now()
+        const  checkTime = new Date(timeToCheck)
+        const time = checkTime.getTime()
+
+        if (now - time > 60 * 1000) {
+            return false
+        }
+        else {
+            return true;
+        }
+    }
 
 
     return (

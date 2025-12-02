@@ -129,7 +129,7 @@ export const setState = async (newState: State) => {
     // Store the position for pending enrollment
     pendingEnrollmentPosition = newState.positionNumber;
     logs.push(
-      `[SYSTEM] Fingerprint registration completed at position: ${newState.data}. Ready for user enrollment.`
+      `[SYSTEM] Fingerprint registration completed at position: ${newState.positionNumber}. Ready for user enrollment.`
     );
   }
   // Handle enrollment command
