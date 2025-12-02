@@ -3,7 +3,7 @@ interface State {
   code: number;
   data: string;
   time: string;
-  positionNumber?: number;
+  positionNumber?: number | null;
 }
 
 interface Item {
@@ -44,6 +44,7 @@ interface PersistentData {
   allUsers: UserInfo[];
   items: Item[];
   activityLogs: ActivityLog[];
+  newEnrollPosition: number | null;
 }
 
 const DATA_FILE_PATH = path.join(process.cwd(), "data.json");
@@ -52,7 +53,6 @@ let currentState: State | null = null;
 let commands: Command[] = [];
 let logs: string[] = [];
 let currentUser: UserInfo | null = null;
-let pendingEnrollmentPosition: number | undefined = undefined;
 
 // File I/O functions for persistent data
 export const readPersistentData = async (): Promise<PersistentData> => {
@@ -61,11 +61,19 @@ export const readPersistentData = async (): Promise<PersistentData> => {
     return JSON.parse(data);
   } catch (error) {
     // Return default structure if file doesn't exist or is corrupted
-    return { currentUser: null, allUsers: [], items: [], activityLogs: [] };
+    return {
+      currentUser: null,
+      allUsers: [],
+      items: [],
+      activityLogs: [],
+      newEnrollPosition: null,
+    };
   }
 };
 
-export const writePersistentData = async (data: PersistentData): Promise<void> => {
+export const writePersistentData = async (
+  data: PersistentData
+): Promise<void> => {
   try {
     await fs.writeFile(DATA_FILE_PATH, JSON.stringify(data, null, 2));
   } catch (error) {
@@ -126,8 +134,12 @@ export const setState = async (newState: State) => {
       "[STATE] Fingerprint registration completed at position:",
       newState.positionNumber
     );
+    const persistentData = await readPersistentData();
     // Store the position for pending enrollment
-    pendingEnrollmentPosition = newState.positionNumber;
+    persistentData.newEnrollPosition = newState.positionNumber
+      ? newState.positionNumber
+      : 0;
+    await writePersistentData(persistentData);
     logs.push(
       `[SYSTEM] Fingerprint registration completed at position: ${newState.positionNumber}. Ready for user enrollment.`
     );
@@ -172,7 +184,6 @@ export const resetAll = async () => {
   commands = [];
   logs = [];
   currentUser = null;
-  pendingEnrollmentPosition = undefined;
 
   // Reset persistent data
   const persistentData: PersistentData = {
@@ -180,6 +191,7 @@ export const resetAll = async () => {
     allUsers: [],
     items: [],
     activityLogs: [],
+    newEnrollPosition: null,
   };
   await writePersistentData(persistentData);
 };
@@ -218,9 +230,15 @@ export const logoutUser = async (): Promise<void> => {
   logs.push("User logged out");
 };
 
-export const getPendingEnrollmentPosition = (): number | undefined =>
-  pendingEnrollmentPosition;
+export const getPendingEnrollmentPosition = async (): Promise<
+  number | null
+> => {
+  const persistentData = await readPersistentData();
+  return persistentData.newEnrollPosition;
+};
 
-export const clearPendingEnrollmentPosition = (): void => {
-  pendingEnrollmentPosition = undefined;
+export const clearPendingEnrollmentPosition = async (): Promise<void> => {
+  const persistentData = await readPersistentData();
+  persistentData.newEnrollPosition = null
+  await writePersistentData(persistentData)
 };
