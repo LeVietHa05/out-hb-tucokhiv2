@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     const apiKey = process.env.ROBOFLOW_API_KEY!;
     const workspace = "workspace-lwoz7";
     const workflowId =
-      "find-wrenches-wire-cutters-screwdrivers-scissors-rubber-hammers-pliers-and-hammers";
+      "custom-workflow";
 
     const response = await fetch(
       `https://serverless.roboflow.com/${workspace}/workflows/${workflowId}`,
