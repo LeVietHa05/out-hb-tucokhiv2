@@ -17,8 +17,8 @@ export async function GET(request: NextRequest): Promise<Response> {
         const format = searchParams.get('format') || 'excel';
 
         // Đọc dữ liệu từ file
-        const userDataPath = path.join(process.cwd(), 'data', 'userData.json');
-        const detectionDataPath = path.join(process.cwd(), 'data', 'detectionData.json');
+        const userDataPath = path.join(process.cwd(), 'data.json');
+        const detectionDataPath = path.join(process.cwd(), 'data', 'detections.json');
 
         const [userDataFile, detectionDataFile] = await Promise.all([
             fs.readFile(userDataPath, 'utf8'),
