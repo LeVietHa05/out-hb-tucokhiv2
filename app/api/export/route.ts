@@ -8,6 +8,7 @@ import {
     User,
     Item,
     Prediction,
+    ActivityLog,
     ExportRow
 } from '@/lib/type';
 
@@ -109,6 +110,23 @@ function prepareExportData(userData: UserData, detectionData: DetectionData): Ex
         });
     });
 
+    // Activity Logs 
+    if (userData.activityLogs && Array.isArray(userData.activityLogs)) {
+        userData.activityLogs.forEach((log: ActivityLog) => {
+            rows.push({
+                category: 'Activity Log',
+                id: log.id,
+                name: log.item_name,
+                type: `Action: ${log.action}`,
+                details: `User ID: ${log.user_id}, Item ID: ${log.item_id}`,
+                timestamp: log.timestamp,
+                action: log.action,
+                user_id: log.user_id,
+                item_name: log.item_name
+            });
+        });
+    }
+
     // Predictions
     detectionData.predictions.predictions.forEach((prediction: Prediction) => {
         rows.push({
@@ -127,7 +145,7 @@ function prepareExportData(userData: UserData, detectionData: DetectionData): Ex
 }
 
 function generateCSV(data: ExportRow[]): string {
-    const headers = ['Category', 'ID', 'Name', 'Type', 'Details', 'Timestamp', 'Confidence', 'Position'];
+    const headers = ['Category', 'ID', 'Name', 'Type', 'Details', 'Timestamp', 'Confidence', 'Position', 'Action', 'User_ID', 'Item_Name'];
     const rows = data.map(row => [
         row.category,
         row.id,
@@ -136,7 +154,10 @@ function generateCSV(data: ExportRow[]): string {
         row.details,
         row.timestamp,
         row.confidence?.toString() || '',
-        row.position || ''
+        row.position || '',
+        row.action || '',
+        row.user_id || '',
+        row.item_name || ''
     ]);
 
     const csvContent = [
@@ -159,11 +180,14 @@ async function generateExcel(data: ExportRow[]): Promise<Buffer> {
         { header: 'Category', key: 'category', width: 15 },
         { header: 'ID', key: 'id', width: 25 },
         { header: 'Name', key: 'name', width: 20 },
-        { header: 'Type', key: 'type', width: 15 },
+        { header: 'Type', key: 'type', width: 20 },
         { header: 'Details', key: 'details', width: 40 },
         { header: 'Timestamp', key: 'timestamp', width: 25 },
         { header: 'Confidence', key: 'confidence', width: 12 },
-        { header: 'Position', key: 'position', width: 15 }
+        { header: 'Position', key: 'position', width: 15 },
+        { header: 'Action', key: 'action', width: 12 },       
+        { header: 'User_ID', key: 'user_id', width: 25 },     
+        { header: 'Item_Name', key: 'item_name', width: 25 }  
     ];
 
     data.forEach(row => {
@@ -175,11 +199,92 @@ async function generateExcel(data: ExportRow[]): Promise<Buffer> {
             details: row.details,
             timestamp: row.timestamp,
             confidence: row.confidence,
-            position: row.position
+            position: row.position,
+            action: row.action || '',       
+            user_id: row.user_id || '',     
+            item_name: row.item_name || '' 
         });
     });
 
-    worksheet.getRow(1).font = { bold: true };
+    // Style cho header
+    const headerRow = worksheet.getRow(1);
+    headerRow.font = { bold: true };
+    headerRow.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFE8F5E8' } // Màu xanh lá nhạt cho header
+    };
+
+    // Style cho từng loại category
+    worksheet.eachRow((row, rowNumber) => {
+        if (rowNumber > 1) {
+            const category = row.getCell('category').value;
+
+            // Màu nền khác nhau cho từng category
+            switch (category) {
+                case 'Current User':
+                    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } }; // AliceBlue
+                    break;
+                case 'All Users':
+                    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } }; // WhiteSmoke
+                    break;
+                case 'Items':
+                    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFFFF0F5' } }; // LavenderBlush
+                    break;
+                case 'Activity Log':
+                    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0FFF0' } }; // Honeydew
+                    break;
+                case 'Detection':
+                    row.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF0F8FF' } }; // AliceBlue
+                    break;
+            }
+        }
+    });
+
+    // Auto-fit columns
+    worksheet.columns.forEach(column => {
+        if (column.width) {
+            column.width = Math.max(column.width, 10);
+        }
+    });
+
+    // Tạo sheet riêng cho Activity Logs (tuỳ chọn)
+    if (data.some(row => row.category === 'Activity Log')) {
+        const activitySheet = workbook.addWorksheet('Activity Logs');
+
+        activitySheet.columns = [
+            { header: 'Timestamp', key: 'timestamp', width: 25 },
+            { header: 'Action', key: 'action', width: 15 },
+            { header: 'User ID', key: 'user_id', width: 25 },
+            { header: 'Item Name', key: 'item_name', width: 30 },
+            { header: 'Item ID', key: 'item_id', width: 25 }
+        ];
+
+        // Lọc chỉ activity logs
+        const activityRows = data.filter(row => row.category === 'Activity Log');
+        activityRows.forEach(row => {
+            // Extract item_id từ details nếu có
+            const itemIdMatch = row.details.match(/Item ID: ([^,]+)/);
+            const itemId = itemIdMatch ? itemIdMatch[1] : '';
+
+            activitySheet.addRow({
+                timestamp: row.timestamp,
+                action: row.action,
+                user_id: row.user_id,
+                item_name: row.item_name,
+                item_id: itemId
+            });
+        });
+
+        // Style cho activity sheet
+        const activityHeader = activitySheet.getRow(1);
+        activityHeader.font = { bold: true };
+        activityHeader.fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FFE8F5E8' }
+        };
+    }
 
     const buffer = await workbook.xlsx.writeBuffer();
     return Buffer.from(buffer);

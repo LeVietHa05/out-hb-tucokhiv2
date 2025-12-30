@@ -28,6 +28,7 @@ export interface UserData {
     currentUser: CurrentUser;
     allUsers: User[];
     items: Item[];
+    activityLogs: ActivityLog[]; // Thêm dòng này
     newEnrollPosition: number | null;
 }
 
@@ -70,4 +71,16 @@ export interface ExportRow {
     timestamp: string;
     confidence?: number;
     position?: string;
+    action?: string;
+    user_id?: string;
+    item_name?: string;
+}
+
+export interface ActivityLog {
+    id: string;
+    user_id: string;
+    action: string;
+    item_id: string;
+    item_name: string;
+    timestamp: string;
 }
